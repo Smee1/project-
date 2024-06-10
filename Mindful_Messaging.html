@@ -1,0 +1,80 @@
+<!--testindex.html file-->
+ 
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {background-color: powderblue;}
+h1   {color: blue;}
+p    {color: red;}
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="logo">Mindful Messaging</h1>
+        <form class="form" id="form">
+            <input class="input" type="text" placeholder="Name" id="myname">
+            <input class="input" type="text" placeholder="Message" id="message">
+            <button class="button">Send Message</button>
+        </form>
+        <div class="messageArea" id="messageArea"></div>
+    </div>
+ 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+ 
+        let form = document.getElementById('form');
+        let myname = document.getElementById('myname');
+        let message = document.getElementById('message');
+		
+<!--Determine string values of data entry-->
+		name = $_POST["myname"]
+		checkmessage = $_POST["message"]
+		
+<!--Pass data to CSV file-->		
+		
+		$data = "checkmessage, TITLE 2, TITLE 3 \n";
+		$fileName   = 'myData.csv';
+		$filePath   = '$_SERVER['DOCUMENT_ROOT']'. $mindfulmessaging.CSV;
+		$fp = fopen($filePath, 'w+');
+		fwrite($fp, print_r($data, true)); 
+		fclose($fp);
+		
+<!--Pass message string to profanity filter via python and return to messaging output.-->		
+		message = shell_exec('py working_htdocs_2a-cli.py'.checkmessage);
+		
+		checkmessage = $_POST["message"]
+		
+<!--Return filtered message to chat service-->	
+		
+		
+        let messageArea = document.getElementById('messageArea');
+ 
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+ 
+            if (message.value) {
+                socket.emit('send name', myname.value);
+                socket.emit('send message', message.value);
+                message.value = '';
+            }
+        });
+ 
+        socket.on('send name', (username) => {
+            let name = document.createElement('p');
+            name.classList.add('message');
+            name.innerHTML = `<span class="username">${username}:</span>`;
+            messageArea.appendChild(name);
+        });
+ 
+        socket.on('send message', (chat) => {
+            let chatContent = document.createElement('p');
+            chatContent.classList.add('message');
+            chatContent.textContent = chat;
+            messageArea.appendChild(chatContent);
+        });
+    </script>
+</body>
+</html>
+
